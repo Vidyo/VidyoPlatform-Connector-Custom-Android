@@ -8,12 +8,12 @@ public final class ConnectParams {
     /**
      * Designated cloud or on-premises portal of customer
      */
-    public static final String PORTAL_HOST = "https://YOUR.PORTAL.com";
+    public static final String PORTAL_HOST = "https://YOUR_PORTAL.com";
 
     /**
      * The room key of the video conference. All the endpoints must share the same room key to join the same video conference.
      */
-    public static final String ROOM_KEY = "YOUR.ROOM.KEY";
+    public static final String ROOM_KEY = "YOUR_ROOM_KEY";
 
     /**
      * The name displayed to other participants in a video conference. For example, "John Smith".

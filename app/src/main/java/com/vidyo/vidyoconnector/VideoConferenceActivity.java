@@ -3,11 +3,12 @@ package com.vidyo.vidyoconnector;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import androidx.fragment.app.FragmentActivity;
 
 import com.vidyo.VidyoClient.Connector.Connector;
 import com.vidyo.VidyoClient.Connector.ConnectorPkg;
@@ -50,6 +51,7 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
     private Connector connector;
 
     private AtomicBoolean isCameraDisabledForBackground = new AtomicBoolean(false);
+    private AtomicBoolean isDisconnectAndQuit = new AtomicBoolean(false);
 
     private CustomTilesHelper customTilesHelper;
 
@@ -186,6 +188,11 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
             controlView.disable(false);
 
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+            /* Wrap up the conference */
+            if (isDisconnectAndQuit.get()) {
+                finish();
+            }
         });
     }
 
@@ -254,12 +261,25 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
 
     @Override
     public void onBackPressed() {
-        if (connector != null && (connector.getState() == Connector.ConnectorState.VIDYO_CONNECTORSTATE_Idle
-                || connector.getState() == Connector.ConnectorState.VIDYO_CONNECTORSTATE_Ready)) {
+        if (connector == null) {
+            Logger.e("Connector is null!");
+            finish();
+            return;
+        }
+
+        Connector.ConnectorState state = connector.getState();
+
+        if (state == Connector.ConnectorState.VIDYO_CONNECTORSTATE_Idle || state == Connector.ConnectorState.VIDYO_CONNECTORSTATE_Ready) {
             super.onBackPressed();
         } else {
             /* You are still connecting or connected */
             Toast.makeText(this, "You have to disconnect or await connection first", Toast.LENGTH_SHORT).show();
+
+            /* Start disconnection if connected. Quit afterward. */
+            if (state == Connector.ConnectorState.VIDYO_CONNECTORSTATE_Connected && !isDisconnectAndQuit.get()) {
+                isDisconnectAndQuit.set(true);
+                onControlEvent(new ControlEvent<>(ControlEvent.Call.CONNECT_DISCONNECT, false));
+            }
         }
     }
 

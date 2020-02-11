@@ -1,6 +1,6 @@
 package com.vidyo.vidyoconnector.tiles;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.vidyo.VidyoClient.Device.RemoteCamera;
 import com.vidyo.VidyoClient.Device.RemoteWindowShare;

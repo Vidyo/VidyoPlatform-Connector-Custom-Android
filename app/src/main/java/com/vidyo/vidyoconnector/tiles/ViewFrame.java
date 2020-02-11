@@ -1,8 +1,9 @@
 package com.vidyo.vidyoconnector.tiles;
 
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.RelativeLayout;
+
+import androidx.annotation.NonNull;
 
 import com.vidyo.vidyoconnector.utils.Logger;
 

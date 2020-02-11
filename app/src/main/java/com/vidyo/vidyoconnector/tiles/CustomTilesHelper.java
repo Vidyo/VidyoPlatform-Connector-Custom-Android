@@ -2,9 +2,10 @@ package com.vidyo.vidyoconnector.tiles;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.support.annotation.UiThread;
 import android.view.View;
 import android.widget.RelativeLayout;
+
+import androidx.annotation.UiThread;
 
 import com.vidyo.VidyoClient.Connector.Connector;
 import com.vidyo.VidyoClient.Device.LocalCamera;
