@@ -14,9 +14,9 @@ import java.util.UUID;
  */
 public class ViewFrame implements Comparable<ViewFrame> {
 
-    private View view;
-    private ViewType viewType;
-    private String unique;
+    private final View view;
+    private final ViewType viewType;
+    private final String unique;
 
     private final int order;
 

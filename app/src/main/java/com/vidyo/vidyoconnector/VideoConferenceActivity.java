@@ -8,6 +8,7 @@ import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
 import com.vidyo.VidyoClient.Connector.Connector;
@@ -50,8 +51,8 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
 
     private Connector connector;
 
-    private AtomicBoolean isCameraDisabledForBackground = new AtomicBoolean(false);
-    private AtomicBoolean isDisconnectAndQuit = new AtomicBoolean(false);
+    private final AtomicBoolean isCameraDisabledForBackground = new AtomicBoolean(false);
+    private final AtomicBoolean isDisconnectAndQuit = new AtomicBoolean(false);
 
     private CustomTilesHelper customTilesHelper;
 
@@ -136,7 +137,7 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (customTilesHelper != null) customTilesHelper.requestInvalidate();
     }
@@ -197,7 +198,7 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
     }
 
     @Override
-    public void onControlEvent(ControlEvent event) {
+    public void onControlEvent(ControlEvent<?> event) {
         if (connector == null) return;
 
         switch (event.getCall()) {
@@ -206,7 +207,7 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
 
                 progressBar.setVisibility(View.VISIBLE);
                 controlView.disable(true);
-                boolean state = (boolean) event.getValue();
+                boolean state = (Boolean) event.getValue();
                 controlView.updateConnectionState(state ? ControlView.ConnectionState.CONNECTING : ControlView.ConnectionState.DISCONNECTING);
 
                 if (state) {
@@ -224,7 +225,7 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
                 }
                 break;
             case MUTE_CAMERA:
-                boolean cameraPrivacy = (boolean) event.getValue();
+                boolean cameraPrivacy = (Boolean) event.getValue();
                 connector.setCameraPrivacy(cameraPrivacy);
 
                 if (cameraPrivacy) {
@@ -235,16 +236,16 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
                 }
                 break;
             case MUTE_MIC:
-                connector.setMicrophonePrivacy((boolean) event.getValue());
+                connector.setMicrophonePrivacy((Boolean) event.getValue());
                 break;
             case MUTE_SPEAKER:
-                connector.setSpeakerPrivacy((boolean) event.getValue());
+                connector.setSpeakerPrivacy((Boolean) event.getValue());
                 break;
             case CYCLE_CAMERA:
                 connector.cycleCamera();
                 break;
             case DEBUG_OPTION:
-                boolean value = (boolean) event.getValue();
+                boolean value = (Boolean) event.getValue();
                 if (value) {
                     connector.enableDebug(7776, "");
                 } else {
@@ -345,14 +346,14 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
     public void onRemoteWindowShareAdded(final RemoteWindowShare remoteWindowShare, final Participant participant) {
         Logger.i(VideoConferenceActivity.class, "RemoteHolder share added");
 
-//        runOnUiThread(() -> customTilesHelper.attachRemote(new RemoteHolder(participant, remoteWindowShare)));
+        runOnUiThread(() -> customTilesHelper.attachRemote(new RemoteHolder(participant, remoteWindowShare)));
     }
 
     @Override
     public void onRemoteWindowShareRemoved(RemoteWindowShare remoteWindowShare, final Participant participant) {
         Logger.i(VideoConferenceActivity.class, "RemoteHolder share removed");
 
-//        runOnUiThread(() -> customTilesHelper.detachRemote(participant, true));
+        runOnUiThread(() -> customTilesHelper.detachRemote(participant, true));
     }
 
     @Override
@@ -398,14 +399,17 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
 
     @Override
     public void onRemoteMicrophoneAdded(RemoteMicrophone remoteMicrophone, Participant participant) {
+        Logger.i("onRemoteMicrophoneAdded");
     }
 
     @Override
     public void onRemoteMicrophoneRemoved(RemoteMicrophone remoteMicrophone, Participant participant) {
+        Logger.i("onRemoteMicrophoneRemoved");
     }
 
     @Override
     public void onRemoteMicrophoneStateUpdated(RemoteMicrophone remoteMicrophone, Participant participant, Device.DeviceState deviceState) {
+        Logger.i("onRemoteMicrophoneStateUpdated: %s", deviceState);
     }
 
     @Override

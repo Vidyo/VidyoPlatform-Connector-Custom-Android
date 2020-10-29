@@ -158,6 +158,7 @@ public class ControlView extends LinearLayout implements View.OnClickListener {
                 invalidateState();
                 break;
             case R.id.switch_control:
+                controlEvent = new ControlEvent<>(ControlEvent.Call.CYCLE_CAMERA);
                 break;
             case R.id.more_control:
                 controlMoreLayout.setVisibility(controlMoreLayout.getVisibility() == GONE ? VISIBLE : GONE);

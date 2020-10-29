@@ -9,6 +9,8 @@ import androidx.annotation.UiThread;
 
 import com.vidyo.VidyoClient.Connector.Connector;
 import com.vidyo.VidyoClient.Device.LocalCamera;
+import com.vidyo.VidyoClient.Device.RemoteCamera;
+import com.vidyo.VidyoClient.Device.RemoteWindowShare;
 import com.vidyo.VidyoClient.Endpoint.Participant;
 import com.vidyo.vidyoconnector.utils.AppUtils;
 import com.vidyo.vidyoconnector.utils.Logger;
@@ -264,13 +266,15 @@ public class CustomTilesHelper implements View.OnLayoutChangeListener {
         connector.hideView(frame);
 
         /* Assign remote view */
-        if (remoteHolder.getCamera() != null && !remoteHolder.isShare()) {
-            connector.assignViewToRemoteCamera(frame, remoteHolder.getCamera(), true, false);
+        RemoteCamera remoteCamera = remoteHolder.getCamera();
+        if (remoteCamera != null && !remoteHolder.isShare()) {
+            connector.assignViewToRemoteCamera(frame, remoteCamera, true, false);
         }
 
         /* Assign remote share */
+        RemoteWindowShare remoteWindowShare = remoteHolder.getShare();
         if (remoteHolder.getShare() != null && remoteHolder.isShare()) {
-            connector.assignViewToRemoteWindowShare(frame, remoteHolder.getShare(), true, false);
+            connector.assignViewToRemoteWindowShare(frame, remoteWindowShare, true, false);
         }
 
         remoteHolder.setRendering(true);
