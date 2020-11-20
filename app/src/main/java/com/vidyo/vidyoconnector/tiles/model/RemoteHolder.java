@@ -1,4 +1,4 @@
-package com.vidyo.vidyoconnector.tiles;
+package com.vidyo.vidyoconnector.tiles.model;
 
 import androidx.annotation.NonNull;
 
@@ -14,7 +14,6 @@ import java.util.Objects;
 public class RemoteHolder {
 
     private Participant participant;
-
     private RemoteCamera camera;
     private RemoteWindowShare share;
 
@@ -86,11 +85,11 @@ public class RemoteHolder {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RemoteHolder remote = (RemoteHolder) o;
-        return isShare == remote.isShare && Objects.equals(participant, remote.participant);
+        return isShare == remote.isShare && Objects.equals(participant.id, remote.participant.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(participant, isShare);
+        return Objects.hash(participant.id, isShare);
     }
 }

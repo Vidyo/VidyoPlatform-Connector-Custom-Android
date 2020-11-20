@@ -7,7 +7,7 @@ import com.vidyo.vidyoconnector.BuildConfig;
 public class Logger {
 
     public enum LogType {
-        ERROR, INFO, WARNING
+        ERROR, INFO, WARNING, DEBUG
     }
 
     private static final boolean ENABLED = BuildConfig.DEBUG;
@@ -15,41 +15,41 @@ public class Logger {
     private static final String TAG = "VidyoConnector";
 
     public static void e(String error) {
-        log(null, error, LogType.ERROR);
+        log(getCallerClassName(), error, LogType.ERROR);
     }
 
-    public static void e(Class cls, String error) {
-        log(cls, error, LogType.ERROR);
+    public static void e(String error, Object... format) {
+        log(getCallerClassName(), String.format(error, format), LogType.ERROR);
     }
 
     public static void i(String info) {
-        log(null, info, LogType.INFO);
+        log(getCallerClassName(), info, LogType.INFO);
     }
 
-    public static void i(Class cls, String info) {
-        log(cls, info, LogType.INFO);
+    public static void i(String info, Object... format) {
+        log(getCallerClassName(), String.format(info, format), LogType.INFO);
     }
 
-    public static void i(Class cls, String info, Object... params) {
-        log(cls, String.format(info, params), LogType.INFO);
+    public static void d(String debug) {
+        log(getCallerClassName(), debug, LogType.DEBUG);
     }
 
-    public static void i(String info, Object... params) {
-        log(null, String.format(info, params), LogType.INFO);
+    public static void d(String debug, Object... format) {
+        log(getCallerClassName(), String.format(debug, format), LogType.DEBUG);
     }
 
     public static void w(String warning) {
-        log(null, warning, LogType.WARNING);
+        log(getCallerClassName(), warning, LogType.WARNING);
     }
 
-    public static void w(Class cls, String warning) {
-        log(cls, warning, LogType.WARNING);
+    public static void w(String warning, Object... format) {
+        log(getCallerClassName(), String.format(warning, format), LogType.WARNING);
     }
 
-    private static void log(Class cls, String message, LogType logType) {
+    private static void log(String cls, String message, LogType logType) {
         StringBuilder builder = new StringBuilder();
         if (cls != null) {
-            builder.append(cls.getSimpleName());
+            builder.append(cls);
             builder.append(": ");
         }
 
@@ -57,20 +57,41 @@ public class Logger {
             builder.append(message);
         }
 
-        String out = builder.toString();
+        String data = builder.toString();
 
-        if (!ENABLED) return;
-
-        switch (logType) {
-            case ERROR:
-                Log.e(TAG, out);
-                break;
-            case WARNING:
-                Log.w(TAG, out);
-                break;
-            case INFO:
-                Log.i(TAG, out);
-                break;
+        if (ENABLED) {
+            switch (logType) {
+                case ERROR:
+                    Log.e(TAG, data);
+                    break;
+                case WARNING:
+                    Log.w(TAG, data);
+                    break;
+                case INFO:
+                    Log.i(TAG, data);
+                    break;
+            }
         }
+    }
+
+    private static String getCallerClassName() {
+        try {
+            StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+            for (int i = 1; i < stElements.length; i++) {
+                StackTraceElement ste = stElements[i];
+                if (!ste.getClassName().equals(Logger.class.getName()) && ste.getClassName().indexOf("java.lang.Thread") != 0) {
+                    return parseClassName(ste) + ": " + ste.getMethodName();
+                }
+            }
+            return null;
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    private static String parseClassName(StackTraceElement stackTraceElement) {
+        String className = stackTraceElement.getClassName();
+        int dotIndex = className.lastIndexOf(".");
+        return dotIndex > 0 ? className.substring(dotIndex) : className;
     }
 }

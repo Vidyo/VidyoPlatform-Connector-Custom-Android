@@ -35,7 +35,7 @@ public class AppUtils {
 
         String[] logFiles = logDir.list();
         if (logFiles != null)
-            for (String file : logFiles) Logger.i(AppUtils.class, "Cached log file: " + file);
+            for (String file : logFiles) Logger.i("Cached log file: " + file);
 
         return logFile.getAbsolutePath();
     }

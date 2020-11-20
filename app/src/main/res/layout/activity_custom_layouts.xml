@@ -12,10 +12,17 @@
         android:orientation="vertical">
 
         <RelativeLayout
-            android:id="@+id/master_container"
+            android:id="@+id/remote_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="@dimen/control_view_size" />
+            android:layout_marginBottom="@dimen/control_view_size" />
+
+        <FrameLayout
+            android:id="@+id/local_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/control_view_size"
+            android:background="@color/colorPrimary" />
 
         <include layout="@layout/control_view_layout" />
     </FrameLayout>

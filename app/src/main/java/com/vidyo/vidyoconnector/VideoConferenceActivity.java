@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -20,11 +21,13 @@ import com.vidyo.VidyoClient.Device.LocalSpeaker;
 import com.vidyo.VidyoClient.Device.RemoteCamera;
 import com.vidyo.VidyoClient.Device.RemoteMicrophone;
 import com.vidyo.VidyoClient.Device.RemoteWindowShare;
+import com.vidyo.VidyoClient.Endpoint.LogRecord;
 import com.vidyo.VidyoClient.Endpoint.Participant;
 import com.vidyo.vidyoconnector.event.ControlEvent;
 import com.vidyo.vidyoconnector.event.IControlLink;
-import com.vidyo.vidyoconnector.tiles.CustomTilesHelper;
-import com.vidyo.vidyoconnector.tiles.RemoteHolder;
+import com.vidyo.vidyoconnector.tiles.TilesApi;
+import com.vidyo.vidyoconnector.tiles.gallery.GalleryTilesManager;
+import com.vidyo.vidyoconnector.tiles.model.RemoteHolder;
 import com.vidyo.vidyoconnector.utils.AppUtils;
 import com.vidyo.vidyoconnector.utils.Logger;
 import com.vidyo.vidyoconnector.view.ControlView;
@@ -39,7 +42,9 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
         Connector.IRegisterLocalCameraEventListener, Connector.IRegisterRemoteCameraEventListener,
         Connector.IRegisterLocalSpeakerEventListener, Connector.IRegisterRemoteMicrophoneEventListener,
         Connector.IRegisterLocalMicrophoneEventListener, Connector.IRegisterResourceManagerEventListener,
-        Connector.IRegisterRemoteWindowShareEventListener, Connector.IRegisterParticipantEventListener, IControlLink {
+        Connector.IRegisterRemoteWindowShareEventListener, Connector.IRegisterParticipantEventListener,
+        Connector.IRegisterLogEventListener,
+        IControlLink, Connector.IRegisterRemoteMicrophoneEnergyListener {
 
     public static final String PORTAL_KEY = "portal.key";
     public static final String ROOM_KEY = "room.key";
@@ -54,7 +59,7 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
     private final AtomicBoolean isCameraDisabledForBackground = new AtomicBoolean(false);
     private final AtomicBoolean isDisconnectAndQuit = new AtomicBoolean(false);
 
-    private CustomTilesHelper customTilesHelper;
+    private TilesApi tilesApi;
 
     @Override
     public void onStart() {
@@ -70,7 +75,7 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
             connector.setSpeakerPrivacy(state.isMuteSpeaker());
         }
 
-        LocalCamera localCamera = customTilesHelper.getLastSelectedLocalCamera();
+        LocalCamera localCamera = tilesApi.getLastSelectedLocalCamera();
         if (connector != null && localCamera != null && isCameraDisabledForBackground.getAndSet(false)) {
             connector.selectLocalCamera(localCamera);
         }
@@ -90,7 +95,7 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
         if (!isFinishing() && connector != null && !controlView.getState().isMuteCamera()
                 && !isCameraDisabledForBackground.getAndSet(true)) {
             connector.selectLocalCamera(null);
-            customTilesHelper.detachLocal();
+            tilesApi.detachLocal();
         }
     }
 
@@ -118,8 +123,10 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
 
         controlView.showVersion(connector.getVersion());
 
-        RelativeLayout container = findViewById(R.id.master_container);
-        customTilesHelper = new CustomTilesHelper(this, connector, container);
+        RelativeLayout remoteContainer = findViewById(R.id.remote_container);
+        FrameLayout localContainer = findViewById(R.id.local_container);
+
+        tilesApi = new GalleryTilesManager(this.connector, localContainer, remoteContainer);
 
         /*
          * Register all the  listeners required for custom implementation
@@ -134,12 +141,15 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
         connector.registerRemoteWindowShareEventListener(this);
 
         connector.registerParticipantEventListener(this);
+        connector.registerLogEventListener(this, "info@VidyoClient info@VidyoConnector");
+
+        connector.registerRemoteMicrophoneEnergyListener(this);
     }
 
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (customTilesHelper != null) customTilesHelper.requestInvalidate();
+        if (tilesApi != null) tilesApi.requestInvalidate();
     }
 
     @Override
@@ -230,9 +240,9 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
 
                 if (cameraPrivacy) {
                     connector.selectLocalCamera(null);
-                    customTilesHelper.detachLocal();
+                    tilesApi.detachLocal();
                 } else {
-                    connector.selectLocalCamera(customTilesHelper.getLastSelectedLocalCamera());
+                    connector.selectLocalCamera(tilesApi.getLastSelectedLocalCamera());
                 }
                 break;
             case MUTE_MIC:
@@ -289,7 +299,7 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
         super.onDestroy();
         if (controlView != null) controlView.unregisterListener();
 
-        if (customTilesHelper != null) customTilesHelper.shutDown();
+        if (tilesApi != null) tilesApi.shutDown();
 
         if (connector != null) {
             connector.unregisterLocalCameraEventListener();
@@ -318,9 +328,9 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
 
     @Override
     public void onLocalCameraSelected(final LocalCamera localCamera) {
-        Logger.i(VideoConferenceActivity.class, "Local camera selected");
+        Logger.i("Local camera selected");
 
-        runOnUiThread(() -> customTilesHelper.attachLocal(localCamera));
+        runOnUiThread(() -> tilesApi.attachLocal(localCamera));
     }
 
     @Override
@@ -330,30 +340,30 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
 
     @Override
     public void onRemoteCameraAdded(final RemoteCamera remoteCamera, final Participant participant) {
-        Logger.i(VideoConferenceActivity.class, "RemoteHolder camera added");
+        Logger.i("RemoteHolder camera added");
 
-        runOnUiThread(() -> customTilesHelper.attachRemote(new RemoteHolder(participant, remoteCamera)));
+        runOnUiThread(() -> tilesApi.attachRemote(new RemoteHolder(participant, remoteCamera)));
     }
 
     @Override
     public void onRemoteCameraRemoved(RemoteCamera remoteCamera, final Participant participant) {
-        Logger.i(VideoConferenceActivity.class, "RemoteHolder camera removed");
+        Logger.i("RemoteHolder camera removed");
 
-        runOnUiThread(() -> customTilesHelper.detachRemote(participant, false));
+        runOnUiThread(() -> tilesApi.detachRemote(new RemoteHolder(participant, remoteCamera)));
     }
 
     @Override
     public void onRemoteWindowShareAdded(final RemoteWindowShare remoteWindowShare, final Participant participant) {
-        Logger.i(VideoConferenceActivity.class, "RemoteHolder share added");
+        Logger.i("RemoteHolder share added");
 
-        runOnUiThread(() -> customTilesHelper.attachRemote(new RemoteHolder(participant, remoteWindowShare)));
+        runOnUiThread(() -> tilesApi.attachRemote(new RemoteHolder(participant, remoteWindowShare)));
     }
 
     @Override
     public void onRemoteWindowShareRemoved(RemoteWindowShare remoteWindowShare, final Participant participant) {
-        Logger.i(VideoConferenceActivity.class, "RemoteHolder share removed");
+        Logger.i("RemoteHolder share removed");
 
-        runOnUiThread(() -> customTilesHelper.detachRemote(participant, true));
+        runOnUiThread(() -> tilesApi.detachRemote(new RemoteHolder(participant, remoteWindowShare)));
     }
 
     @Override
@@ -361,7 +371,7 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
         Logger.i("Loudest participant arrived. Name: %s", participant.getName());
 
         runOnUiThread(() -> {
-            if (customTilesHelper != null) customTilesHelper.updateLoudest(participant);
+            if (tilesApi != null) tilesApi.updateLoudest(participant);
         });
     }
 
@@ -451,5 +461,15 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
     @Override
     public void onDynamicParticipantChanged(ArrayList<Participant> arrayList) {
 
+    }
+
+    @Override
+    public void onLog(LogRecord logRecord) {
+
+    }
+
+    @Override
+    public void onRemoteMicrophoneEnergy(RemoteMicrophone remoteMicrophone, Participant participant, int i) {
+        Logger.i("Remote mic: %s. Party: %s. Energy: %d", remoteMicrophone.name, participant.name, i);
     }
 }
