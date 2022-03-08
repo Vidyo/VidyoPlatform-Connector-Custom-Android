@@ -1,9 +1,10 @@
 package com.vidyo.vidyoconnector.tiles.gallery;
 
+import static com.vidyo.vidyoconnector.tiles.model.Command.NONE;
+
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.UiThread;
@@ -15,12 +16,11 @@ import com.vidyo.vidyoconnector.tiles.TilesApi;
 import com.vidyo.vidyoconnector.tiles.model.Command;
 import com.vidyo.vidyoconnector.tiles.model.RemoteHolder;
 import com.vidyo.vidyoconnector.utils.Logger;
+import com.vidyo.vidyoconnector.view.VideoFrameLayout;
 
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
-
-import static com.vidyo.vidyoconnector.tiles.model.Command.NONE;
 
 public class GalleryTilesManager implements TilesApi, View.OnLayoutChangeListener {
 
@@ -45,7 +45,7 @@ public class GalleryTilesManager implements TilesApi, View.OnLayoutChangeListene
      */
     private Participant considerLoudest;
 
-    public GalleryTilesManager(Connector connector, FrameLayout localContainer, RelativeLayout remoteContainer) {
+    public GalleryTilesManager(Connector connector, VideoFrameLayout localContainer, RelativeLayout remoteContainer) {
         this.connector = connector;
         this.viewManager = new GalleryViewManager(localContainer, remoteContainer);
 

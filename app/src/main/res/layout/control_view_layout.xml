@@ -5,5 +5,5 @@
     android:id="@+id/control_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="bottom"
+    android:layout_alignParentBottom="true"
     tools:layout_height="@dimen/control_view_size" />

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/background_light">
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
@@ -17,7 +17,7 @@
             android:layout_height="match_parent"
             android:layout_marginBottom="@dimen/control_view_size" />
 
-        <FrameLayout
+        <com.vidyo.vidyoconnector.view.VideoFrameLayout
             android:id="@+id/local_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -25,7 +25,7 @@
             android:background="@color/colorPrimary" />
 
         <include layout="@layout/control_view_layout" />
-    </FrameLayout>
+    </RelativeLayout>
 
     <include layout="@layout/progress_layout" />
 </FrameLayout>

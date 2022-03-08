@@ -5,7 +5,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -31,6 +30,7 @@ import com.vidyo.vidyoconnector.tiles.model.RemoteHolder;
 import com.vidyo.vidyoconnector.utils.AppUtils;
 import com.vidyo.vidyoconnector.utils.Logger;
 import com.vidyo.vidyoconnector.view.ControlView;
+import com.vidyo.vidyoconnector.view.VideoFrameLayout;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -124,7 +124,7 @@ public class VideoConferenceActivity extends FragmentActivity implements Connect
         controlView.showVersion(connector.getVersion());
 
         RelativeLayout remoteContainer = findViewById(R.id.remote_container);
-        FrameLayout localContainer = findViewById(R.id.local_container);
+        VideoFrameLayout localContainer = findViewById(R.id.local_container);
 
         tilesApi = new GalleryTilesManager(this.connector, localContainer, remoteContainer);
 

@@ -1,9 +1,7 @@
 package com.vidyo.vidyoconnector.tiles.gallery;
 
 import android.graphics.Color;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.vidyo.vidyoconnector.BuildConfig;
@@ -20,10 +18,10 @@ public class GalleryViewManager {
 
     private static final int MAX_TILES = 4;
 
-    private final FrameLayout selfView;
+    private final VideoFrameLayout selfView;
     private final RelativeLayout remoteContainer;
 
-    public GalleryViewManager(FrameLayout selfView, RelativeLayout remoteContainer) {
+    public GalleryViewManager(VideoFrameLayout selfView, RelativeLayout remoteContainer) {
         this.selfView = selfView;
         this.remoteContainer = remoteContainer;
     }
@@ -69,31 +67,32 @@ public class GalleryViewManager {
             if (viewType == ViewType.REMOTE_LOUDEST) return view;
         }
 
-        throw new IllegalStateException("No loudest!");
+        return null;
     }
 
     public View updateSelfViewPosition(int participants) {
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) selfView.getLayoutParams();
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) selfView.getLayoutParams();
         selfView.setTag(ViewType.LOCAL);
 
         int width = remoteContainer.getMeasuredWidth();
         int height = remoteContainer.getMeasuredHeight();
+        boolean isLandscape = AppUtils.isLandscape(this.selfView.getResources());
 
         if (participants > 0) {
-            boolean isLandscape = AppUtils.isLandscape(this.selfView.getResources());
+            selfView.enableDrag(true);
 
             params.width = isLandscape ? width / 8 : width / 4;
             params.height = isLandscape ? height / 3 : height / 4;
 
             int margin = remoteContainer.getResources().getDimensionPixelSize(R.dimen.material_margin);
             params.setMargins(margin, margin, margin, margin);
-            params.gravity = (Gravity.TOP | Gravity.END);
         } else {
+            selfView.enableDrag(false);
+
             params.width = width;
             params.height = height;
 
             params.setMargins(0, 0, 0, 0);
-            params.gravity = Gravity.TOP | Gravity.CENTER;
         }
 
         return selfView;
